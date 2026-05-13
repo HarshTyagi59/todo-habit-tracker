@@ -1,0 +1,11 @@
+# Backend secrets
+backend/.env
+backend/node_modules/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# General
+.DS_Store
+*.log
