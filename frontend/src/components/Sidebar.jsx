@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, CheckSquare, Flame, X } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, Flame, User } from 'lucide-react'
 
 const Sidebar = ({ isOpen }) => {
   const links = [
     { to: '/', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
     { to: '/tasks', icon: <CheckSquare size={20} />, label: 'Tasks' },
     { to: '/habits', icon: <Flame size={20} />, label: 'Habits' },
+    { to: '/profile', icon: <User size={20} />, label: 'Profile' },
   ]
 
   return (
@@ -20,12 +21,19 @@ const Sidebar = ({ isOpen }) => {
       {/* Logo */}
       <div style={{ padding: '8px 12px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ background: 'var(--accent)', borderRadius: '10px', padding: '8px', display: 'flex' }}>
+          <div style={{
+            background: 'var(--accent)', borderRadius: '10px',
+            padding: '8px', display: 'flex'
+          }}>
             <Flame size={20} color="white" />
           </div>
           <div>
-            <div style={{ fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)' }}>FocusFlow</div>
-            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Todo + Habits</div>
+            <div style={{ fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)' }}>
+              FocusFlow
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+              Todo + Habits
+            </div>
           </div>
         </div>
       </div>

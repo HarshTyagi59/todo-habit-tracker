@@ -7,11 +7,19 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Tasks from './pages/Tasks'
 import Habits from './pages/Habits'
+import Profile from './pages/Profile'
 import Layout from './components/Layout'
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
-  if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'var(--text-secondary)'}}>Loading...</div>
+  if (loading) return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      height: '100vh', color: 'var(--text-secondary)'
+    }}>
+      Loading...
+    </div>
+  )
   return user ? children : <Navigate to="/login" />
 }
 
@@ -20,7 +28,11 @@ function App() {
     <AuthProvider>
       <ThemeProvider>
         <Toaster position="top-right" toastOptions={{
-          style: { background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border)' }
+          style: {
+            background: 'var(--bg-card)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border)'
+          }
         }} />
         <BrowserRouter>
           <Routes>
@@ -30,7 +42,9 @@ function App() {
               <Route index element={<Dashboard />} />
               <Route path="tasks" element={<Tasks />} />
               <Route path="habits" element={<Habits />} />
+              <Route path="profile" element={<Profile />} />
             </Route>
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

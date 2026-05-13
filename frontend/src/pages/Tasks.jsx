@@ -9,6 +9,9 @@ const Tasks = () => {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [search, setSearch] = useState('')
+  // ✅ Bug 5 Fix — Added filter states
+  const [filterPriority, setFilterPriority] = useState('all')
+  const [filterCategory, setFilterCategory] = useState('all')
   const [form, setForm] = useState({
     title: '', priority: 'medium', category: 'personal', dueDate: '', notes: ''
   })
@@ -61,9 +64,17 @@ const Tasks = () => {
     }
   }
 
-  const filteredTasks = tasks.filter(t =>
-    t.title.toLowerCase().includes(search.toLowerCase())
-  )
+  // ✅ Bug 4 Fix — Search title + category + notes
+  // ✅ Bug 5 Fix — Filter by priority + category
+  const filteredTasks = tasks.filter(t => {
+    const matchSearch =
+      t.title.toLowerCase().includes(search.toLowerCase()) ||
+      t.category?.toLowerCase().includes(search.toLowerCase()) ||
+      t.notes?.toLowerCase().includes(search.toLowerCase())
+    const matchPriority = filterPriority === 'all' || t.priority === filterPriority
+    const matchCategory = filterCategory === 'all' || t.category === filterCategory
+    return matchSearch && matchPriority && matchCategory
+  })
 
   if (loading) return (
     <div style={{ color: 'var(--text-primary)', textAlign: 'center', marginTop: '50px' }}>
@@ -74,11 +85,16 @@ const Tasks = () => {
   return (
     <div>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between',
+        alignItems: 'center', marginBottom: '30px'
+      }}>
         <div>
-          <h1 style={{ color: 'var(--text-primary)', fontSize: '28px', margin: 0 }}>My Tasks ✅</h1>
+          <h1 style={{ color: 'var(--text-primary)', fontSize: '28px', margin: 0 }}>
+            My Tasks ✅
+          </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '4px' }}>
-            {tasks.filter(t => t.completed).length}/{tasks.length} tasks completed today
+            {tasks.filter(t => t.completed).length}/{tasks.length} tasks completed
           </p>
         </div>
         <button
@@ -86,23 +102,29 @@ const Tasks = () => {
           style={{
             background: 'var(--accent)', color: 'white', border: 'none',
             padding: '12px 20px', borderRadius: '12px', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600,
-            fontSize: '14px'
+            display: 'flex', alignItems: 'center', gap: '8px',
+            fontWeight: 600, fontSize: '14px'
           }}
         >
           <Plus size={20} /> Add Task
         </button>
       </div>
 
-      {/* Search */}
-      <div style={{ marginBottom: '24px' }}>
-        <div style={{ position: 'relative' }}>
+      {/* ✅ Bug 4 + 5 Fix — Search + Filter Row */}
+      <div style={{
+        display: 'flex', gap: '12px',
+        marginBottom: '24px', flexWrap: 'wrap'
+      }}>
+
+        {/* Search */}
+        <div style={{ position: 'relative', flex: 2, minWidth: '200px' }}>
           <Search size={18} style={{
             position: 'absolute', left: '12px', top: '50%',
             transform: 'translateY(-50%)', color: 'var(--text-secondary)'
           }} />
           <input
-            type="text" placeholder="Search tasks..."
+            type="text"
+            placeholder="Search by title, category, notes..."
             value={search} onChange={e => setSearch(e.target.value)}
             style={{
               width: '100%', padding: '12px 12px 12px 40px',
@@ -112,6 +134,60 @@ const Tasks = () => {
             }}
           />
         </div>
+
+        {/* Priority Filter */}
+        <select
+          value={filterPriority}
+          onChange={e => setFilterPriority(e.target.value)}
+          style={{
+            padding: '12px 16px', borderRadius: '10px',
+            border: '1px solid var(--border)', background: 'var(--bg-secondary)',
+            color: 'var(--text-primary)', fontSize: '14px',
+            outline: 'none', cursor: 'pointer', flex: 1, minWidth: '140px'
+          }}
+        >
+          <option value="all">🎯 All Priority</option>
+          <option value="high">🔴 High</option>
+          <option value="medium">🟡 Medium</option>
+          <option value="low">🟢 Low</option>
+        </select>
+
+        {/* Category Filter */}
+        <select
+          value={filterCategory}
+          onChange={e => setFilterCategory(e.target.value)}
+          style={{
+            padding: '12px 16px', borderRadius: '10px',
+            border: '1px solid var(--border)', background: 'var(--bg-secondary)',
+            color: 'var(--text-primary)', fontSize: '14px',
+            outline: 'none', cursor: 'pointer', flex: 1, minWidth: '140px'
+          }}
+        >
+          <option value="all">🏷️ All Categories</option>
+          <option value="personal">Personal</option>
+          <option value="work">Work</option>
+          <option value="college">College</option>
+          <option value="shopping">Shopping</option>
+        </select>
+
+        {/* Clear Filters Button — only shows when filters are active */}
+        {(filterPriority !== 'all' || filterCategory !== 'all' || search) && (
+          <button
+            onClick={() => {
+              setSearch('')
+              setFilterPriority('all')
+              setFilterCategory('all')
+            }}
+            style={{
+              padding: '12px 16px', borderRadius: '10px',
+              border: '1px solid #ef4444', background: 'none',
+              color: '#ef4444', fontSize: '14px', cursor: 'pointer',
+              fontWeight: 600, whiteSpace: 'nowrap'
+            }}
+          >
+            ✕ Clear
+          </button>
+        )}
       </div>
 
       {/* Stats Row */}
@@ -123,20 +199,38 @@ const Tasks = () => {
           { label: 'High Priority', value: tasks.filter(t => t.priority === 'high').length, color: '#ef4444' },
         ].map(stat => (
           <div key={stat.label} style={{
-            flex: 1, background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+            flex: 1, background: 'var(--bg-secondary)',
+            border: '1px solid var(--border)',
             borderRadius: '12px', padding: '16px', textAlign: 'center'
           }}>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: stat.color }}>{stat.value}</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>{stat.label}</div>
+            <div style={{ fontSize: '24px', fontWeight: 700, color: stat.color }}>
+              {stat.value}
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+              {stat.label}
+            </div>
           </div>
         ))}
       </div>
+
+      {/* Filtered Results Info */}
+      {(filterPriority !== 'all' || filterCategory !== 'all' || search) && (
+        <p style={{
+          color: 'var(--text-secondary)', fontSize: '13px',
+          marginBottom: '12px', marginTop: '-8px'
+        }}>
+          Showing {filteredTasks.length} of {tasks.length} tasks
+        </p>
+      )}
 
       {/* Task List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {filteredTasks.length > 0 ? (
           filteredTasks.map(task => (
-            <TaskCard key={task._id} task={task} onToggle={toggleTask} onDelete={deleteTask} />
+            <TaskCard
+              key={task._id} task={task}
+              onToggle={toggleTask} onDelete={deleteTask}
+            />
           ))
         ) : (
           <div style={{
@@ -144,7 +238,10 @@ const Tasks = () => {
             marginTop: '60px', fontSize: '15px'
           }}>
             <div style={{ fontSize: '40px', marginBottom: '12px' }}>✨</div>
-            No tasks found. Start by adding one!
+            {search || filterPriority !== 'all' || filterCategory !== 'all'
+              ? 'No tasks match your filters!'
+              : 'No tasks found. Start by adding one!'
+            }
           </div>
         )}
       </div>
@@ -180,7 +277,8 @@ const Tasks = () => {
               {/* Priority + Category */}
               <div style={{ display: 'flex', gap: '12px' }}>
                 <select
-                  value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })}
+                  value={form.priority}
+                  onChange={e => setForm({ ...form, priority: e.target.value })}
                   style={{
                     flex: 1, padding: '12px', borderRadius: '8px',
                     border: '1px solid var(--border)', background: 'var(--bg-primary)',
@@ -193,7 +291,8 @@ const Tasks = () => {
                 </select>
 
                 <select
-                  value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
+                  value={form.category}
+                  onChange={e => setForm({ ...form, category: e.target.value })}
                   style={{
                     flex: 1, padding: '12px', borderRadius: '8px',
                     border: '1px solid var(--border)', background: 'var(--bg-primary)',
@@ -242,14 +341,11 @@ const Tasks = () => {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  style={{
-                    flex: 1, padding: '12px', borderRadius: '8px',
-                    border: 'none', background: 'var(--accent)',
-                    color: 'white', fontWeight: 600, cursor: 'pointer', fontSize: '14px'
-                  }}
-                >
+                <button type="submit" style={{
+                  flex: 1, padding: '12px', borderRadius: '8px',
+                  border: 'none', background: 'var(--accent)',
+                  color: 'white', fontWeight: 600, cursor: 'pointer', fontSize: '14px'
+                }}>
                   Create Task
                 </button>
               </div>
